@@ -20,16 +20,16 @@
           sourceRoot = ".";
           installPhase = "cp shape-predictor-68-face-landmarks.dat $out";
         };
-        facestab-py = pkgs.writers.writePython3Bin "facestab-py"
+        python = pkgs.python3.withPackages (ps: [ ps.dlib ps.tqdm ps.numpy ps.matplotlib ]);
+        writePython = buildPythonPackages: name: pkgs.writers.makeScriptWriter
           {
-            libraries = [
-              pkgs.python3Packages.dlib
-              pkgs.python3Packages.tqdm
-              pkgs.python3Packages.numpy
-              pkgs.python3Packages.matplotlib
-            ];
+            inherit (python) interpreter; check = pkgs.lib.optionalString python.isPy3k (pkgs.writers.writeDash "pythoncheck.sh" ''
+            exec ${buildPythonPackages.flake8}/bin/flake8 --show-source "$1"
+          '');
           }
-          (builtins.readFile ./facestab.py);
+          name;
+        writePythonBin = name: writePython pkgs.python3Packages "/bin/${name}";
+        facestab-py = writePythonBin "facestab-py" (builtins.readFile ./facestab.py);
       in
       {
         packages = {
@@ -38,6 +38,7 @@
         };
 
         devShells.default = pkgs.mkShell {
+          nativeBuildInputs = [ python ];
           SHAPE_PREDICTOR = "${shape-predictor}";
         };
       });
