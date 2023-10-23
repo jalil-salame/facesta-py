@@ -1,1 +1,4 @@
 result
+# Ignore images
+*.jpg
+*.png
