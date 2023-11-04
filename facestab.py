@@ -40,7 +40,7 @@ def main():
     )
 
     detector = get_frontal_face_detector()  # thread unsafe
-    predictor = shape_predictor(ppath.as_posix())
+    predictor = shape_predictor(str(ppath.as_posix()))
 
     for path in tqdm(list(args.IMAGES_DIR.iterdir())[:1]):
         image = load_rgb_image(path.as_posix())
